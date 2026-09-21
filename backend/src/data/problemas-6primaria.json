@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "enunciado": "María tiene 24 caramelos y quiere repartirlos a partes iguales entre sus 4 amigas. ¿Cuántos caramelos recibe cada una?",
+    "respuesta": 6
+  },
+  {
+    "id": 2,
+    "enunciado": "En un autobús hay 3 filas de 8 asientos y en otro autobús hay 5 filas de 6 asientos. Si ambos van completamente llenos, ¿cuántos pasajeros hay en total?",
+    "respuesta": 54
+  },
+  {
+    "id": 3,
+    "enunciado": "Pedro ahorra 15 euros cada semana. ¿Cuánto habrá ahorrado después de 6 semanas?",
+    "respuesta": 90
+  },
+  {
+    "id": 4,
+    "enunciado": "Una tienda tenía 150 lápices. Vendió 45 el lunes y 38 el martes. ¿Cuántos lápices le quedan?",
+    "respuesta": 67
+  },
+  {
+    "id": 5,
+    "enunciado": "Un equipo de fútbol ha marcado 4 goles en cada uno de los 7 partidos que ha jugado. ¿Cuántos goles ha marcado en total?",
+    "respuesta": 28
+  },
+  {
+    "id": 6,
+    "enunciado": "Laura compra 3 paquetes de galletas con 12 galletas cada uno y las reparte entre sus 6 primos a partes iguales. ¿Cuántas galletas recibe cada primo?",
+    "respuesta": 6
+  },
+  {
+    "id": 7,
+    "enunciado": "Un tren sale de la estación con 120 pasajeros. En la primera parada bajan 35 y suben 20. ¿Cuántos pasajeros hay en el tren después de la parada?",
+    "respuesta": 105
+  },
+  {
+    "id": 8,
+    "enunciado": "Ana tiene 3 cajas con 25 canicas cada una. Si regala 40 canicas a su hermano, ¿cuántas canicas le quedan?",
+    "respuesta": 35
+  },
+  {
+    "id": 9,
+    "enunciado": "Un cine tiene 18 filas con 15 butacas cada una. Si se han vendido 200 entradas, ¿cuántas butacas quedan libres?",
+    "respuesta": 70
+  },
+  {
+    "id": 10,
+    "enunciado": "Carlos reparte 96 cromos entre él y sus 3 hermanos a partes iguales. ¿Cuántos cromos recibe cada uno?",
+    "respuesta": 24
+  },
+  {
+    "id": 11,
+    "enunciado": "En una biblioteca hay 12 estanterías con 30 libros cada una. Si retiran 85 libros para donarlos, ¿cuántos libros quedan?",
+    "respuesta": 275
+  },
+  {
+    "id": 12,
+    "enunciado": "Un panadero hace 8 hornadas de 24 panes cada una. Si vende 150 panes, ¿cuántos panes le quedan?",
+    "respuesta": 42
+  }
+]

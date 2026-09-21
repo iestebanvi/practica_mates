@@ -1,0 +1,236 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-peque: #ff8a65;
+  --color-peque-sombra: #d0530f;
+  --color-mayor: #4fc3f7;
+  --color-mayor-sombra: #0288d1;
+  --color-correcto: #66bb6a;
+  --color-correcto-sombra: #2e7d32;
+  --color-incorrecto: #e64a19;
+  --color-puntos: #f9a825;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  background: linear-gradient(135deg, #fef6e4, #e0f7fa);
+  color: #2b2b2b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+}
+
+.pantalla {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-top: 0;
+}
+
+/* Home */
+.perfiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 4px 0 var(--sombra, rgba(0, 0, 0, 0.2));
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--sombra, rgba(0, 0, 0, 0.2));
+}
+
+.perfil {
+  flex: 1 1 160px;
+  padding: 1.5rem 1rem;
+  font-size: 1.3rem;
+}
+
+.perfil-pequeno {
+  background: var(--color-peque);
+  --sombra: var(--color-peque-sombra);
+}
+
+.perfil-mayor {
+  background: var(--color-mayor);
+  --sombra: var(--color-mayor-sombra);
+}
+
+/* Practica */
+.marcador {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.puntos {
+  color: var(--color-puntos);
+}
+
+.enunciado {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.enunciado-problema {
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.ejercicio input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 3px solid var(--color-mayor);
+  margin-bottom: 1rem;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.ejercicio input::-webkit-outer-spin-button,
+.ejercicio input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ejercicio input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.ejercicio input.correcta {
+  border-color: var(--color-correcto);
+  background: #e8f5e9;
+}
+
+.ejercicio input.incorrecta {
+  border-color: var(--color-incorrecto);
+  background: #fbe9e7;
+}
+
+.ejercicio button {
+  width: 100%;
+  background: var(--color-correcto);
+  --sombra: var(--color-correcto-sombra);
+}
+
+.feedback-hueco {
+  min-height: 2.5rem;
+  margin-top: 1rem;
+}
+
+.feedback {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  animation: aparecer 0.2s ease-out;
+}
+
+.feedback.correcto {
+  color: var(--color-correcto-sombra);
+}
+
+.feedback.incorrecto {
+  color: var(--color-incorrecto);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.finalizar {
+  margin-top: 1.5rem;
+  background: transparent;
+  color: #757575;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: underline;
+  padding: 0.5rem;
+  box-shadow: none;
+}
+
+.finalizar:active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Resumen */
+.puntos-totales {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-puntos);
+  margin: 0.5rem 0;
+}
+
+.detalle {
+  font-size: 1.1rem;
+}
+
+.mensaje {
+  font-size: 1.4rem;
+  margin: 1.5rem 0;
+}
+
+.resumen button {
+  background: var(--color-mayor);
+  --sombra: var(--color-mayor-sombra);
+  width: 100%;
+}
+
+@media (max-width: 400px) {
+  .enunciado {
+    font-size: 2.2rem;
+  }
+
+  .puntos-totales {
+    font-size: 2.4rem;
+  }
+}
