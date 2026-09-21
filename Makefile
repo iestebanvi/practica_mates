@@ -2,8 +2,7 @@
         docker-build docker-run docker-stop \
         railway-build railway-deploy railway-release railway-smoke
 
-GHCR_IMAGE  := ghcr.io/iestebanvi/practica-mates
-RAILWAY_URL := https://practica-mates-production.up.railway.app
+GHCR_IMAGE := ghcr.io/iestebanvi/practica-mates
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*##"}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -49,5 +48,6 @@ railway-deploy: ## Redeploy en Railway (usa la última imagen de GHCR)
 
 railway-release: railway-build railway-deploy ## Build + push + deploy en un solo paso
 
-railway-smoke: ## Comprobación rápida de salud en producción
-	@curl -sf $(RAILWAY_URL)/api/health && echo " ✅ Railway OK" || echo " ❌ Railway DOWN"
+railway-smoke: ## Comprobación rápida de salud en producción (resuelve el dominio actual, Railway puede cambiarlo)
+	@url=$$(railway status --json | node -e "const j=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(j.environments.edges[0].node.serviceInstances.edges[0].node.domains.serviceDomains[0].domain)"); \
+	curl -sf "https://$$url/api/health" > /dev/null && echo " ✅ Railway OK (https://$$url)" || echo " ❌ Railway DOWN (https://$$url)"

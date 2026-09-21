@@ -84,6 +84,8 @@ make railway-deploy    # solo redeploy (usa la imagen :latest ya subida)
 make railway-smoke     # comprobación rápida de /api/health en producción
 ```
 
-URL de producción: https://practica-mates-production.up.railway.app
+URL de producción: https://practica-mates-jungfrau.up.railway.app
+
+> Railway puede regenerar el dominio `.up.railway.app` en algún momento (ya ha pasado una vez sin motivo aparente). Si `make railway-smoke` da error, comprueba la URL actual en el dashboard de Railway o con `railway status --json` y actualiza este README — `railway-smoke` ya la resuelve solo, no hace falta tocar el Makefile.
 
 No requiere base de datos ni variables de entorno adicionales: Railway inyecta `PORT` y el servidor ya lo respeta. El paquete de GHCR es público, así que Railway no necesita ninguna credencial de registro para poder descargarlo.
