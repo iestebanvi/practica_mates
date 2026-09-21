@@ -35,6 +35,9 @@ const PUNTOS_PROBLEMA = 20
 // Si el banco aún no ha cargado, se descarta esa opción para no bloquear el juego.
 export function elegirTipoOperacion(operaciones, bancoProblemas = []) {
   const disponibles = operaciones.filter((op) => op !== 'problema' || bancoProblemas.length > 0)
+  if (disponibles.length === 0) {
+    throw new Error('No hay ninguna operación disponible (¿el banco de problemas aún no ha cargado?)')
+  }
   return disponibles[randomInt(0, disponibles.length - 1)]
 }
 

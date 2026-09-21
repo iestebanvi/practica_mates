@@ -32,30 +32,92 @@ function puntosEsperados(enunciado) {
   return op === '+' || op === '-' ? 10 : 15
 }
 
+async function entrarEnAritmetica(page) {
+  await page.goto('/')
+  await page.getByRole('button', { name: /Mayor/ }).click()
+  await page.getByRole('button', { name: 'Aritmética' }).click()
+}
+
+async function entrarEnProblemas(page) {
+  await page.goto('/')
+  await page.getByRole('button', { name: /Mayor/ }).click()
+  await page.getByRole('button', { name: 'Problemas' }).click()
+}
+
+async function entrarEnPeque(page, modoNombre) {
+  await page.goto('/')
+  await page.getByRole('button', { name: /Peque/ }).click()
+  await page.getByRole('button', { name: modoNombre }).click()
+}
+
 test.describe('Practica Mates', () => {
-  test('el input recupera el foco automáticamente tras fallar una respuesta', async ({ page }) => {
-    await page.goto('/')
-    await page.getByRole('button', { name: /Peque/ }).click()
+  test('Peque se muestra todo en mayúsculas; Mayor no', async ({ page }) => {
+    await entrarEnPeque(page, 'Sumas')
+    await expect(page.locator('.pantalla')).toHaveCSS('text-transform', 'uppercase')
+
+    await entrarEnAritmetica(page)
+    await expect(page.locator('.pantalla')).toHaveCSS('text-transform', 'none')
+  })
+
+  test('Peque - Sumas: solo genera sumas', async ({ page }) => {
+    await entrarEnPeque(page, 'Sumas')
+    const enunciado = await page.locator('.enunciado').innerText()
+    expect(enunciado).toContain('+')
+    expect(enunciado).not.toContain('-')
+  })
+
+  test('Peque - Restas: solo genera restas', async ({ page }) => {
+    await entrarEnPeque(page, 'Restas')
+    const enunciado = await page.locator('.enunciado').innerText()
+    expect(enunciado).toContain('-')
+    expect(enunciado).not.toContain('+')
+  })
+
+  test('Peque ve una celebración animada al acertar', async ({ page }) => {
+    await entrarEnPeque(page, 'Sumas')
+
+    const enunciado = await page.locator('.enunciado').innerText()
+    const [a, , b] = enunciado.replace('=', '').trim().split(' ')
+    const respuesta = Number(a) + Number(b)
+
+    await page.locator('input[type="number"]').fill(String(respuesta))
+    await page.getByRole('button', { name: 'COMPROBAR' }).click()
+
+    await expect(page.locator('.celebracion')).toBeVisible()
+    await expect(page.locator('.celebracion')).not.toHaveText('')
+  })
+
+  test('el input recupera el foco automáticamente tras fallar una respuesta (Peque)', async ({ page }) => {
+    await entrarEnPeque(page, 'Sumas')
 
     const enunciado = page.locator('.enunciado')
     const input = page.locator('input[type="number"]')
     const textoAnterior = await enunciado.innerText()
 
     await input.fill('999999')
-    await page.getByRole('button', { name: 'Comprobar' }).click()
+    await page.getByRole('button', { name: 'COMPROBAR' }).click()
 
     await expect(page.locator('.feedback.incorrecto')).toBeVisible()
     await expect(enunciado).not.toHaveText(textoAnterior, { timeout: 3000 })
     await expect(input).toBeFocused()
   })
 
-  test('flujo completo: acertar, finalizar y ver el resumen', async ({ page }) => {
+  test('la pantalla de modo permite volver atrás', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /Mayor/ }).click()
+    await expect(page.getByRole('button', { name: 'Aritmética' })).toBeVisible()
+
+    await page.getByRole('button', { name: '← Volver' }).click()
+    await expect(page.getByRole('button', { name: /Peque/ })).toBeVisible()
+  })
+
+  test('modo Aritmética: nunca genera problemas, y flujo completo hasta el resumen', async ({ page }) => {
+    await entrarEnAritmetica(page)
 
     const enunciado = await page.locator('.enunciado').innerText()
-    const input = page.locator('input[type="number"]')
+    expect(respuestasProblemas.has(enunciado)).toBe(false)
 
+    const input = page.locator('input[type="number"]')
     await input.fill(String(respuestaCorrecta(enunciado)))
     await page.getByRole('button', { name: 'Comprobar' }).click()
     await expect(page.locator('.feedback.correcto')).toBeVisible()
@@ -67,28 +129,59 @@ test.describe('Practica Mates', () => {
     await expect(page.locator('.detalle')).toHaveText('Aciertos: 1 · Fallos: 0')
   })
 
-  test('las preguntas de tipo problema usan el banco curado y valen 20 puntos', async ({ page }) => {
-    await page.goto('/')
-    await page.getByRole('button', { name: /Mayor/ }).click()
+  test('modo Aritmética: el panel "Anterior" muestra la operación y la solución tras fallar', async ({
+    page,
+  }) => {
+    await entrarEnAritmetica(page)
+
+    const enunciadoInicial = await page.locator('.enunciado').innerText()
+    const enunciadoSinIgual = enunciadoInicial.replace(/\s*=$/, '')
+    const respuesta = respuestaCorrecta(enunciadoInicial)
+    const respuestaDada = respuesta + 1000
+
+    await page.locator('input[type="number"]').fill(String(respuestaDada))
+    await page.getByRole('button', { name: 'Comprobar' }).click()
+    await expect(page.locator('.feedback.incorrecto')).toBeVisible()
+
+    // Tras el auto-avance al siguiente ejercicio, el panel "Anterior" debe seguir visible
+    await expect(page.locator('.enunciado')).not.toHaveText(enunciadoInicial, { timeout: 3000 })
+    const anterior = page.locator('.anterior')
+    await expect(anterior).toHaveClass(/incorrecto/)
+    await expect(anterior).toHaveText(
+      `Anterior: ${enunciadoSinIgual} = ${respuesta} ✗ (pusiste ${respuestaDada})`,
+    )
+  })
+
+  test('modo Problemas: todas las preguntas vienen del banco curado y valen 20 puntos', async ({ page }) => {
+    await entrarEnProblemas(page)
 
     const enunciado = page.locator('.enunciado')
+    const texto = await enunciado.innerText()
+    expect(respuestasProblemas.has(texto)).toBe(true)
+    await expect(enunciado).toHaveClass(/enunciado-problema/)
+
     const input = page.locator('input[type="number"]')
+    await input.fill(String(respuestaCorrecta(texto)))
+    await page.getByRole('button', { name: 'Comprobar' }).click()
+    await expect(page.locator('.feedback.correcto')).toBeVisible()
 
-    let esProblema = false
-    for (let intento = 0; intento < 30 && !esProblema; intento++) {
-      const texto = await enunciado.innerText()
-      esProblema = respuestasProblemas.has(texto)
-      if (esProblema) {
-        await expect(enunciado).toHaveClass(/enunciado-problema/)
-        break
-      }
+    await page.getByRole('button', { name: 'Finalizar' }).click()
+    await expect(page.locator('.puntos-totales')).toHaveText('20 puntos')
+  })
 
-      await input.fill(String(respuestaCorrecta(texto)))
-      await page.getByRole('button', { name: 'Comprobar' }).click()
-      await expect(page.locator('.feedback.correcto')).toBeVisible()
-      await expect(enunciado).not.toHaveText(texto, { timeout: 3000 })
-    }
+  test('modo Problemas: el panel "Anterior" es breve y no repite el enunciado', async ({ page }) => {
+    await entrarEnProblemas(page)
 
-    expect(esProblema).toBe(true)
+    const texto = await page.locator('.enunciado').innerText()
+    const respuesta = respuestasProblemas.get(texto)
+
+    await page.locator('input[type="number"]').fill('-1')
+    await page.getByRole('button', { name: 'Comprobar' }).click()
+    await expect(page.locator('.feedback.incorrecto')).toBeVisible()
+
+    await expect(page.locator('.enunciado')).not.toHaveText(texto, { timeout: 3000 })
+    await expect(page.locator('.anterior')).toHaveText(
+      `Anterior: ✗ tu respuesta (-1) — la correcta era ${respuesta}`,
+    )
   })
 })

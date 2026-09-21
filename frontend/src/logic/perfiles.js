@@ -12,3 +12,38 @@ export const PERFILES = {
     nivel: 'medio',
   },
 }
+
+// El perfil "mayor" elige, en una pantalla aparte, entre practicar solo
+// aritmética o solo problemas de enunciado (no se mezclan entre sí).
+export const MODOS_MAYOR = {
+  aritmetica: {
+    id: 'aritmetica',
+    nombre: 'Aritmética',
+    operaciones: ['suma', 'resta', 'multiplicacion', 'division'],
+  },
+  problemas: {
+    id: 'problemas',
+    nombre: 'Problemas',
+    operaciones: ['problema'],
+  },
+}
+
+// El perfil "pequeño" también elige entre sumas o restas por separado:
+// todavía no domina bien la resta, así que no conviene mezclarlas.
+export const MODOS_PEQUE = {
+  sumas: {
+    id: 'sumas',
+    nombre: 'Sumas',
+    operaciones: ['suma'],
+  },
+  restas: {
+    id: 'restas',
+    nombre: 'Restas',
+    operaciones: ['resta'],
+  },
+}
+
+export const MODOS_POR_PERFIL = {
+  pequeno: MODOS_PEQUE,
+  mayor: MODOS_MAYOR,
+}

@@ -5,11 +5,12 @@ function mensajeMotivador(puntos) {
   return '¡Increíble! 🏆'
 }
 
-export default function Resumen({ resumen, onVolver }) {
+export default function Resumen({ resumen, perfilId, onVolver }) {
   const { puntos, aciertos, fallos } = resumen
+  const esPeque = perfilId === 'pequeno'
 
   return (
-    <div className="pantalla resumen">
+    <div className={`pantalla resumen${esPeque ? ' peque' : ''}`}>
       <h1>Resumen de la sesión</h1>
       <p className="puntos-totales">{puntos} puntos</p>
       <p className="detalle">

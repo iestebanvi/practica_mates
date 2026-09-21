@@ -55,6 +55,10 @@ describe('elegirTipoOperacion', () => {
     }
     expect(tipos).toContain('problema')
   })
+
+  it('lanza un error si no queda ninguna operación disponible (modo "Problemas" sin banco)', () => {
+    expect(() => elegirTipoOperacion(['problema'], [])).toThrow()
+  })
 })
 
 describe('generarEjercicioDesdeBanco', () => {
