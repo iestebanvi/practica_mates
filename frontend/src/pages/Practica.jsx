@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { generarEjercicioParaPerfil, comprobarRespuesta } from '../logic/ejercicios.js'
 import { PERFILES, MODOS_POR_PERFIL } from '../logic/perfiles.js'
+import Reloj from '../components/Reloj.jsx'
 
 const CELEBRACIONES = ['🎉', '🌟', '🦄', '🐉', '🚀', '🥳', '🌈', '🐬']
+const TIPOS_SIN_ENUNCIADO = ['problema', 'hora']
 
 function elegirCelebracion() {
   return CELEBRACIONES[Math.floor(Math.random() * CELEBRACIONES.length)]
@@ -57,19 +59,18 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
   }, [bancoListo])
 
   useEffect(() => {
-    inputRef.current?.focus()
+    if (ejercicio?.tipo !== 'hora') inputRef.current?.focus()
   }, [ejercicio])
 
-  function comprobar(evento) {
-    evento.preventDefault()
-    if (respuesta === '' || feedback !== null || !ejercicio) return
+  function procesarRespuesta(respuestaDada) {
+    if (feedback !== null || !ejercicio) return
 
-    const esCorrecta = comprobarRespuesta(ejercicio, respuesta)
+    const esCorrecta = comprobarRespuesta(ejercicio, respuestaDada)
     setUltimoIntento({
       tipo: ejercicio.tipo,
       enunciado: ejercicio.enunciado,
       respuestaCorrecta: ejercicio.respuesta,
-      respuestaDada: respuesta,
+      respuestaDada,
       esCorrecta,
     })
 
@@ -89,6 +90,12 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
       setFeedback(null)
       setCelebracion(null)
     }, 900)
+  }
+
+  function comprobar(evento) {
+    evento.preventDefault()
+    if (respuesta === '') return
+    procesarRespuesta(respuesta)
   }
 
   function finalizar() {
@@ -113,6 +120,8 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
   }
 
   const esProblema = ejercicio.tipo === 'problema'
+  const esHora = ejercicio.tipo === 'hora'
+  const sinEnunciado = TIPOS_SIN_ENUNCIADO.includes(ultimoIntento?.tipo)
 
   return (
     <div className={clasePantalla}>
@@ -124,33 +133,46 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
       {ultimoIntento && (
         <p className={`anterior ${ultimoIntento.esCorrecta ? 'correcto' : 'incorrecto'}`}>
           {ultimoIntento.esCorrecta
-            ? ultimoIntento.tipo === 'problema'
+            ? sinEnunciado
               ? 'Anterior: ✓ correcto'
               : `Anterior: ${ultimoIntento.enunciado} = ${ultimoIntento.respuestaCorrecta} ✓`
-            : ultimoIntento.tipo === 'problema'
+            : sinEnunciado
               ? `Anterior: ✗ tu respuesta (${ultimoIntento.respuestaDada}) — la correcta era ${ultimoIntento.respuestaCorrecta}`
               : `Anterior: ${ultimoIntento.enunciado} = ${ultimoIntento.respuestaCorrecta} ✗ (pusiste ${ultimoIntento.respuestaDada})`}
         </p>
       )}
 
-      <form onSubmit={comprobar} className="ejercicio">
-        <p className={`enunciado${esProblema ? ' enunciado-problema' : ''}`}>
-          {ejercicio.enunciado}
-          {!esProblema && ' ='}
-        </p>
-        <input
-          ref={inputRef}
-          type="number"
-          inputMode="numeric"
-          className={feedback === 'correcto' ? 'correcta' : feedback === 'incorrecto' ? 'incorrecta' : ''}
-          value={respuesta}
-          onChange={(e) => setRespuesta(e.target.value)}
-          disabled={feedback !== null}
-        />
-        <button type="submit" disabled={feedback !== null}>
-          Comprobar
-        </button>
-      </form>
+      {esHora ? (
+        <>
+          <Reloj hora={ejercicio.hora} minuto={ejercicio.minuto} />
+          <div className="opciones-hora">
+            {ejercicio.opciones.map((opcion) => (
+              <button key={opcion} onClick={() => procesarRespuesta(opcion)} disabled={feedback !== null}>
+                {opcion}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <form onSubmit={comprobar} className="ejercicio">
+          <p className={`enunciado${esProblema ? ' enunciado-problema' : ''}`}>
+            {ejercicio.enunciado}
+            {!esProblema && ' ='}
+          </p>
+          <input
+            ref={inputRef}
+            type="number"
+            inputMode="numeric"
+            className={feedback === 'correcto' ? 'correcta' : feedback === 'incorrecto' ? 'incorrecta' : ''}
+            value={respuesta}
+            onChange={(e) => setRespuesta(e.target.value)}
+            disabled={feedback !== null}
+          />
+          <button type="submit" disabled={feedback !== null}>
+            Comprobar
+          </button>
+        </form>
+      )}
 
       <div className="feedback-hueco">
         {feedback === 'correcto' && esPeque && (

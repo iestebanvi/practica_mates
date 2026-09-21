@@ -3,12 +3,14 @@ import { generarSuma } from './sumas.js'
 import { generarResta } from './restas.js'
 import { generarMultiplicacion } from './multiplicaciones.js'
 import { generarDivision } from './divisiones.js'
+import { generarHora } from './horas.js'
 
 const GENERADORES = {
   suma: generarSuma,
   resta: generarResta,
   multiplicacion: generarMultiplicacion,
   division: generarDivision,
+  hora: generarHora,
 }
 
 export function generarEjercicio(operacion, nivel = 'facil') {
@@ -25,6 +27,9 @@ export function generarEjercicioAleatorio(operaciones, nivel = 'facil') {
 }
 
 export function comprobarRespuesta(ejercicio, respuestaUsuario) {
+  if (ejercicio.tipo === 'hora') {
+    return respuestaUsuario === ejercicio.respuesta
+  }
   return Number(respuestaUsuario) === ejercicio.respuesta
 }
 

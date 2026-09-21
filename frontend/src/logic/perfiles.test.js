@@ -19,4 +19,8 @@ describe('MODOS_PEQUE', () => {
   it('el modo restas solo contiene restas', () => {
     expect(MODOS_PEQUE.restas.operaciones).toEqual(['resta'])
   })
+
+  it('el modo horas solo contiene el tipo hora', () => {
+    expect(MODOS_PEQUE.horas.operaciones).toEqual(['hora'])
+  })
 })

@@ -50,6 +50,12 @@ async function entrarEnPeque(page, modoNombre) {
   await page.getByRole('button', { name: modoNombre }).click()
 }
 
+async function leerHoraCorrecta(page) {
+  const aria = await page.locator('.reloj').getAttribute('aria-label')
+  const [, hora, minuto] = aria.match(/las (\d+) y (\d+) minutos/)
+  return `${hora}:${minuto.padStart(2, '0')}`
+}
+
 test.describe('Practica Mates', () => {
   test('Peque se muestra todo en mayúsculas; Mayor no', async ({ page }) => {
     await entrarEnPeque(page, 'Sumas')
@@ -71,6 +77,34 @@ test.describe('Practica Mates', () => {
     const enunciado = await page.locator('.enunciado').innerText()
     expect(enunciado).toContain('-')
     expect(enunciado).not.toContain('+')
+  })
+
+  test('Peque - Horas: muestra el reloj y 4 opciones; acertar suma puntos', async ({ page }) => {
+    await entrarEnPeque(page, 'Horas')
+    await expect(page.locator('.reloj')).toBeVisible()
+    await expect(page.locator('.opciones-hora button')).toHaveCount(4)
+
+    const correcta = await leerHoraCorrecta(page)
+    await page.getByRole('button', { name: correcta, exact: true }).click()
+
+    await expect(page.locator('.feedback.correcto')).toBeVisible()
+    await expect(page.locator('.puntos')).toHaveText('⭐ 10')
+    await expect(page.locator('.anterior')).toHaveText('Anterior: ✓ correcto')
+  })
+
+  test('Peque - Horas: fallar muestra la hora correcta en el panel "Anterior"', async ({ page }) => {
+    await entrarEnPeque(page, 'Horas')
+
+    const correcta = await leerHoraCorrecta(page)
+    const opciones = await page.locator('.opciones-hora button').allInnerTexts()
+    const incorrecta = opciones.find((o) => o !== correcta)
+
+    await page.getByRole('button', { name: incorrecta, exact: true }).click()
+
+    await expect(page.locator('.feedback.incorrecto')).toBeVisible()
+    await expect(page.locator('.anterior')).toHaveText(
+      `Anterior: ✗ tu respuesta (${incorrecta}) — la correcta era ${correcta}`,
+    )
   })
 
   test('Peque ve una celebración animada al acertar', async ({ page }) => {

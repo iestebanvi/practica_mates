@@ -15,6 +15,7 @@ describe('generarEjercicio', () => {
     expect(generarEjercicio('resta').tipo).toBe('resta')
     expect(generarEjercicio('multiplicacion').tipo).toBe('multiplicacion')
     expect(generarEjercicio('division').tipo).toBe('division')
+    expect(generarEjercicio('hora').tipo).toBe('hora')
   })
 
   it('lanza un error si la operación no existe', () => {
@@ -101,5 +102,11 @@ describe('comprobarRespuesta', () => {
   it('rechaza una respuesta incorrecta', () => {
     expect(comprobarRespuesta(ejercicio, 4)).toBe(false)
     expect(comprobarRespuesta(ejercicio, 'no sé')).toBe(false)
+  })
+
+  it('para el tipo "hora" compara la respuesta como texto exacto', () => {
+    const ejercicioHora = { tipo: 'hora', hora: 9, minuto: 15, respuesta: '9:15' }
+    expect(comprobarRespuesta(ejercicioHora, '9:15')).toBe(true)
+    expect(comprobarRespuesta(ejercicioHora, '9:30')).toBe(false)
   })
 })

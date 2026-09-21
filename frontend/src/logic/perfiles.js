@@ -41,6 +41,11 @@ export const MODOS_PEQUE = {
     nombre: 'Restas',
     operaciones: ['resta'],
   },
+  horas: {
+    id: 'horas',
+    nombre: 'Horas',
+    operaciones: ['hora'],
+  },
 }
 
 export const MODOS_POR_PERFIL = {
