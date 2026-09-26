@@ -4,6 +4,7 @@ import { generarResta } from './restas.js'
 import { generarMultiplicacion } from './multiplicaciones.js'
 import { generarDivision } from './divisiones.js'
 import { generarHora } from './horas.js'
+import { generarVocabulario } from './vocabulario.js'
 
 const GENERADORES = {
   suma: generarSuma,
@@ -12,6 +13,10 @@ const GENERADORES = {
   division: generarDivision,
   hora: generarHora,
 }
+
+// Tipos cuya respuesta se compara como texto exacto (opción múltiple),
+// en vez de como número (input numérico).
+const TIPOS_RESPUESTA_TEXTO = ['hora', 'vocabulario']
 
 export function generarEjercicio(operacion, nivel = 'facil') {
   const generador = GENERADORES[operacion]
@@ -27,7 +32,7 @@ export function generarEjercicioAleatorio(operaciones, nivel = 'facil') {
 }
 
 export function comprobarRespuesta(ejercicio, respuestaUsuario) {
-  if (ejercicio.tipo === 'hora') {
+  if (TIPOS_RESPUESTA_TEXTO.includes(ejercicio.tipo)) {
     return respuestaUsuario === ejercicio.respuesta
   }
   return Number(respuestaUsuario) === ejercicio.respuesta
@@ -35,13 +40,20 @@ export function comprobarRespuesta(ejercicio, respuestaUsuario) {
 
 const PUNTOS_PROBLEMA = 20
 
-// El perfil "mayor" incluye 'problema' entre sus operaciones, pero esos
-// ejercicios no se generan: se eligen del banco curado que llega del backend.
-// Si el banco aún no ha cargado, se descarta esa opción para no bloquear el juego.
-export function elegirTipoOperacion(operaciones, bancoProblemas = []) {
-  const disponibles = operaciones.filter((op) => op !== 'problema' || bancoProblemas.length > 0)
+// Algunos tipos ('problema', 'vocabulario') no se generan: se eligen de un
+// banco curado que llega del backend. Si el banco aún no ha cargado, se
+// descarta esa opción para no bloquear el juego.
+const GENERADORES_DESDE_BANCO = {
+  problema: generarEjercicioDesdeBanco,
+  vocabulario: generarVocabulario,
+}
+
+export function elegirTipoOperacion(operaciones, banco = []) {
+  const disponibles = operaciones.filter(
+    (op) => !(op in GENERADORES_DESDE_BANCO) || banco.length > 0,
+  )
   if (disponibles.length === 0) {
-    throw new Error('No hay ninguna operación disponible (¿el banco de problemas aún no ha cargado?)')
+    throw new Error('No hay ninguna operación disponible (¿el banco aún no ha cargado?)')
   }
   return disponibles[randomInt(0, disponibles.length - 1)]
 }
@@ -56,10 +68,11 @@ export function generarEjercicioDesdeBanco(bancoProblemas) {
   }
 }
 
-export function generarEjercicioParaPerfil(perfil, bancoProblemas = []) {
-  const tipo = elegirTipoOperacion(perfil.operaciones, bancoProblemas)
-  if (tipo === 'problema') {
-    return generarEjercicioDesdeBanco(bancoProblemas)
+export function generarEjercicioParaPerfil(perfil, banco = []) {
+  const tipo = elegirTipoOperacion(perfil.operaciones, banco)
+  const generadorDesdeBanco = GENERADORES_DESDE_BANCO[tipo]
+  if (generadorDesdeBanco) {
+    return generadorDesdeBanco(banco)
   }
   return generarEjercicio(tipo, perfil.nivel)
 }

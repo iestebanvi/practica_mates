@@ -26,6 +26,11 @@ export const MODOS_MAYOR = {
     nombre: 'Problemas',
     operaciones: ['problema'],
   },
+  vocabulario: {
+    id: 'vocabulario',
+    nombre: 'Vocabulario',
+    operaciones: ['vocabulario'],
+  },
 }
 
 // El perfil "pequeño" también elige entre sumas o restas por separado:

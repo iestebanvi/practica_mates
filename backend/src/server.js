@@ -3,6 +3,7 @@ import express from 'express'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import problemasRouter from './routes/problemas.js'
+import vocabularioRouter from './routes/vocabulario.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.join(__dirname, '..', 'public')
@@ -17,6 +18,7 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/problemas', problemasRouter)
+app.use('/api/vocabulario', vocabularioRouter)
 
 app.use(express.static(publicDir))
 

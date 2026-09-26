@@ -7,7 +7,7 @@ import {
   generarEjercicioDesdeBanco,
   generarEjercicioParaPerfil,
 } from './ejercicios.js'
-import { PERFILES } from './perfiles.js'
+import { PERFILES, MODOS_MAYOR } from './perfiles.js'
 
 describe('generarEjercicio', () => {
   it('genera un ejercicio del tipo pedido', () => {
@@ -60,6 +60,12 @@ describe('elegirTipoOperacion', () => {
   it('lanza un error si no queda ninguna operación disponible (modo "Problemas" sin banco)', () => {
     expect(() => elegirTipoOperacion(['problema'], [])).toThrow()
   })
+
+  it('también funciona con "vocabulario" como tipo respaldado por banco', () => {
+    expect(() => elegirTipoOperacion(['vocabulario'], [])).toThrow()
+    const banco = [{ ingles: 'A', catalan: 'un/a' }]
+    expect(elegirTipoOperacion(['vocabulario'], banco)).toBe('vocabulario')
+  })
 })
 
 describe('generarEjercicioDesdeBanco', () => {
@@ -89,6 +95,18 @@ describe('generarEjercicioParaPerfil', () => {
     }
     expect(tipos).toContain('problema')
   })
+
+  it('genera vocabulario a partir del banco de palabras', () => {
+    const banco = [
+      { ingles: 'BREAKFAST', catalan: 'esmorzar' },
+      { ingles: 'LUNCH', catalan: 'dinar' },
+      { ingles: 'DINNER', catalan: 'sopar' },
+      { ingles: 'STREET', catalan: 'carrer' },
+    ]
+    const ej = generarEjercicioParaPerfil(MODOS_MAYOR.vocabulario, banco)
+    expect(ej.tipo).toBe('vocabulario')
+    expect(banco.some((p) => p.ingles === ej.enunciado && p.catalan === ej.respuesta)).toBe(true)
+  })
 })
 
 describe('comprobarRespuesta', () => {
@@ -108,5 +126,11 @@ describe('comprobarRespuesta', () => {
     const ejercicioHora = { tipo: 'hora', hora: 9, minuto: 15, respuesta: '9:15' }
     expect(comprobarRespuesta(ejercicioHora, '9:15')).toBe(true)
     expect(comprobarRespuesta(ejercicioHora, '9:30')).toBe(false)
+  })
+
+  it('para el tipo "vocabulario" compara la respuesta como texto exacto', () => {
+    const ejercicioVocab = { tipo: 'vocabulario', enunciado: 'BREAKFAST', respuesta: 'esmorzar' }
+    expect(comprobarRespuesta(ejercicioVocab, 'esmorzar')).toBe(true)
+    expect(comprobarRespuesta(ejercicioVocab, 'dinar')).toBe(false)
   })
 })

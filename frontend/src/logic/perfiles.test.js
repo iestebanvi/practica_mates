@@ -9,6 +9,10 @@ describe('MODOS_MAYOR', () => {
   it('el modo problemas solo contiene el tipo problema', () => {
     expect(MODOS_MAYOR.problemas.operaciones).toEqual(['problema'])
   })
+
+  it('el modo vocabulario solo contiene el tipo vocabulario', () => {
+    expect(MODOS_MAYOR.vocabulario.operaciones).toEqual(['vocabulario'])
+  })
 })
 
 describe('MODOS_PEQUE', () => {

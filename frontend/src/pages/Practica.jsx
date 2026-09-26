@@ -5,6 +5,11 @@ import Reloj from '../components/Reloj.jsx'
 
 const CELEBRACIONES = ['🎉', '🌟', '🦄', '🐉', '🚀', '🥳', '🌈', '🐬']
 const TIPOS_SIN_ENUNCIADO = ['problema', 'hora']
+const TIPOS_OPCION_MULTIPLE = ['hora', 'vocabulario']
+const ENDPOINTS_BANCO = {
+  problema: '/api/problemas',
+  vocabulario: '/api/vocabulario',
+}
 
 function elegirCelebracion() {
   return CELEBRACIONES[Math.floor(Math.random() * CELEBRACIONES.length)]
@@ -17,10 +22,11 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
   const operaciones = modoActual ? modoActual.operaciones : perfilBase.operaciones
   const nivel = perfilBase.nivel
   const nombreMostrado = modoActual ? `${perfilBase.nombre} · ${modoActual.nombre}` : perfilBase.nombre
-  const necesitaBanco = operaciones.includes('problema')
+  const tipoBanco = operaciones.find((op) => op in ENDPOINTS_BANCO)
+  const necesitaBanco = Boolean(tipoBanco)
   const clasePantalla = `pantalla practica${esPeque ? ' peque' : ''}`
 
-  const [bancoProblemas, setBancoProblemas] = useState([])
+  const [banco, setBanco] = useState([])
   const [bancoListo, setBancoListo] = useState(!necesitaBanco)
   const [bancoError, setBancoError] = useState(false)
   const [ejercicio, setEjercicio] = useState(() =>
@@ -37,10 +43,10 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
 
   function cargarBanco() {
     setBancoError(false)
-    fetch('/api/problemas')
+    fetch(ENDPOINTS_BANCO[tipoBanco])
       .then((res) => res.json())
       .then((data) => {
-        setBancoProblemas(data)
+        setBanco(data)
         setBancoListo(true)
       })
       .catch(() => setBancoError(true))
@@ -53,13 +59,13 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
 
   useEffect(() => {
     if (bancoListo && ejercicio === null) {
-      setEjercicio(generarEjercicioParaPerfil({ operaciones, nivel }, bancoProblemas))
+      setEjercicio(generarEjercicioParaPerfil({ operaciones, nivel }, banco))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bancoListo])
 
   useEffect(() => {
-    if (ejercicio?.tipo !== 'hora') inputRef.current?.focus()
+    if (!TIPOS_OPCION_MULTIPLE.includes(ejercicio?.tipo)) inputRef.current?.focus()
   }, [ejercicio])
 
   function procesarRespuesta(respuestaDada) {
@@ -85,7 +91,7 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
     }
 
     setTimeout(() => {
-      setEjercicio(generarEjercicioParaPerfil({ operaciones, nivel }, bancoProblemas))
+      setEjercicio(generarEjercicioParaPerfil({ operaciones, nivel }, banco))
       setRespuesta('')
       setFeedback(null)
       setCelebracion(null)
@@ -105,7 +111,7 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
   if (bancoError) {
     return (
       <div className={clasePantalla}>
-        <p>No se han podido cargar los problemas.</p>
+        <p>No se han podido cargar los datos.</p>
         <button onClick={cargarBanco}>Reintentar</button>
       </div>
     )
@@ -121,6 +127,7 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
 
   const esProblema = ejercicio.tipo === 'problema'
   const esHora = ejercicio.tipo === 'hora'
+  const esVocabulario = ejercicio.tipo === 'vocabulario'
   const sinEnunciado = TIPOS_SIN_ENUNCIADO.includes(ultimoIntento?.tipo)
 
   return (
@@ -142,17 +149,17 @@ export default function Practica({ perfilId, modo, onFinalizar }) {
         </p>
       )}
 
-      {esHora ? (
-        <>
-          <Reloj hora={ejercicio.hora} minuto={ejercicio.minuto} />
-          <div className="opciones-hora">
-            {ejercicio.opciones.map((opcion) => (
-              <button key={opcion} onClick={() => procesarRespuesta(opcion)} disabled={feedback !== null}>
-                {opcion}
-              </button>
-            ))}
-          </div>
-        </>
+      {esHora && <Reloj hora={ejercicio.hora} minuto={ejercicio.minuto} />}
+      {esVocabulario && <p className="enunciado enunciado-vocabulario">{ejercicio.enunciado}</p>}
+
+      {esHora || esVocabulario ? (
+        <div className="opciones">
+          {ejercicio.opciones.map((opcion) => (
+            <button key={opcion} onClick={() => procesarRespuesta(opcion)} disabled={feedback !== null}>
+              {opcion}
+            </button>
+          ))}
+        </div>
       ) : (
         <form onSubmit={comprobar} className="ejercicio">
           <p className={`enunciado${esProblema ? ' enunciado-problema' : ''}`}>

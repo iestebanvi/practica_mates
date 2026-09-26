@@ -12,6 +12,14 @@ const bancoProblemas = JSON.parse(
 )
 const respuestasProblemas = new Map(bancoProblemas.map((p) => [p.enunciado, p.respuesta]))
 
+const bancoVocabulario = JSON.parse(
+  readFileSync(
+    path.join(__dirname, '..', 'backend', 'src', 'data', 'vocabulario-ingles-6primaria.json'),
+    'utf-8',
+  ),
+)
+const traduccionesVocabulario = new Map(bancoVocabulario.map((p) => [p.ingles, p.catalan]))
+
 function respuestaCorrecta(enunciado) {
   if (respuestasProblemas.has(enunciado)) {
     return respuestasProblemas.get(enunciado)
@@ -42,6 +50,12 @@ async function entrarEnProblemas(page) {
   await page.goto('/')
   await page.getByRole('button', { name: /Mayor/ }).click()
   await page.getByRole('button', { name: 'Problemas' }).click()
+}
+
+async function entrarEnVocabulario(page) {
+  await page.goto('/')
+  await page.getByRole('button', { name: /Mayor/ }).click()
+  await page.getByRole('button', { name: 'Vocabulario' }).click()
 }
 
 async function entrarEnPeque(page, modoNombre) {
@@ -82,7 +96,7 @@ test.describe('Practica Mates', () => {
   test('Peque - Horas: muestra el reloj y 4 opciones; acertar suma puntos', async ({ page }) => {
     await entrarEnPeque(page, 'Horas')
     await expect(page.locator('.reloj')).toBeVisible()
-    await expect(page.locator('.opciones-hora button')).toHaveCount(4)
+    await expect(page.locator('.opciones button')).toHaveCount(4)
 
     const correcta = await leerHoraCorrecta(page)
     await page.getByRole('button', { name: correcta, exact: true }).click()
@@ -96,7 +110,7 @@ test.describe('Practica Mates', () => {
     await entrarEnPeque(page, 'Horas')
 
     const correcta = await leerHoraCorrecta(page)
-    const opciones = await page.locator('.opciones-hora button').allInnerTexts()
+    const opciones = await page.locator('.opciones button').allInnerTexts()
     const incorrecta = opciones.find((o) => o !== correcta)
 
     await page.getByRole('button', { name: incorrecta, exact: true }).click()
@@ -216,6 +230,39 @@ test.describe('Practica Mates', () => {
     await expect(page.locator('.enunciado')).not.toHaveText(texto, { timeout: 3000 })
     await expect(page.locator('.anterior')).toHaveText(
       `Anterior: ✗ tu respuesta (-1) — la correcta era ${respuesta}`,
+    )
+  })
+
+  test('modo Vocabulario: muestra la palabra en inglés y 4 opciones en catalán; acertar suma puntos', async ({
+    page,
+  }) => {
+    await entrarEnVocabulario(page)
+
+    const palabra = await page.locator('.enunciado').innerText()
+    expect(traduccionesVocabulario.has(palabra)).toBe(true)
+    await expect(page.locator('.opciones button')).toHaveCount(4)
+
+    const correcta = traduccionesVocabulario.get(palabra)
+    await page.getByRole('button', { name: correcta, exact: true }).click()
+
+    await expect(page.locator('.feedback.correcto')).toBeVisible()
+    await expect(page.locator('.puntos')).toHaveText('⭐ 10')
+    await expect(page.locator('.anterior')).toHaveText(`Anterior: ${palabra} = ${correcta} ✓`)
+  })
+
+  test('modo Vocabulario: fallar muestra la traducción correcta en el panel "Anterior"', async ({ page }) => {
+    await entrarEnVocabulario(page)
+
+    const palabra = await page.locator('.enunciado').innerText()
+    const correcta = traduccionesVocabulario.get(palabra)
+    const opciones = await page.locator('.opciones button').allInnerTexts()
+    const incorrecta = opciones.find((o) => o !== correcta)
+
+    await page.getByRole('button', { name: incorrecta, exact: true }).click()
+
+    await expect(page.locator('.feedback.incorrecto')).toBeVisible()
+    await expect(page.locator('.anterior')).toHaveText(
+      `Anterior: ${palabra} = ${correcta} ✗ (pusiste ${incorrecta})`,
     )
   })
 })

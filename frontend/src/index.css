@@ -21,6 +21,8 @@
   --color-restas-sombra: #4527a0;
   --color-horas: #ec407a;
   --color-horas-sombra: #ad1457;
+  --color-vocabulario: #3949ab;
+  --color-vocabulario-sombra: #1a237e;
 }
 
 html {
@@ -130,6 +132,11 @@ button:active {
   --sombra: var(--color-horas-sombra);
 }
 
+.modo-vocabulario {
+  background: var(--color-vocabulario);
+  --sombra: var(--color-vocabulario-sombra);
+}
+
 /* Perfil Peque: solo sabe leer en mayúscula, y una letra más grande le va mejor */
 .peque {
   text-transform: uppercase;
@@ -192,7 +199,7 @@ button:active {
   font-size: 1.3rem;
 }
 
-.peque .opciones-hora button {
+.peque .opciones button {
   font-size: 1.5rem;
 }
 
@@ -233,14 +240,14 @@ button:active {
   fill: #2b2b2b;
 }
 
-.opciones-hora {
+.opciones {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.opciones-hora button {
+.opciones button {
   background: var(--color-mayor);
   --sombra: var(--color-mayor-sombra);
   font-size: 1.3rem;
@@ -313,6 +320,11 @@ button:active {
   font-weight: 500;
   text-align: left;
   line-height: 1.5;
+}
+
+.enunciado-vocabulario {
+  font-size: 2.1rem;
+  line-height: 1.3;
 }
 
 .ejercicio input {
